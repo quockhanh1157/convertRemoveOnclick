@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modify JSP Files</title>
+    <style>
+        #chooseButton {
+            cursor: pointer;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<h1>Modify JSP Files in Chosen Folder</h1>
+<form id="uploadForm" action="/upload-folder" method="POST" enctype="multipart/form-data">
+    <input type="file" name="files[]" id="fileInput" webkitdirectory directory multiple style="display: none;">
+    <button type="button" id="chooseButton">Choose Folder</button>
+    <input type="submit" value="Upload">
+</form>
+
+<script>
+    document.getElementById('chooseButton').addEventListener('click', function() {
+        document.getElementById('fileInput').click();
+    });
+
+    document.getElementById('uploadForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Ngăn chặn form submit mặc định
+
+        var formData = new FormData(this);
+
+        // Gửi POST request để upload folder
+        fetch('/upload-folder', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Tạo một liên kết để tải xuống tập tin ZIP
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'modified_folder.zip';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+</script>
+</body>
+</html>
